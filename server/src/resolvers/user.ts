@@ -1,11 +1,13 @@
 import argon2 from "argon2";
+import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { UserMutationResponse } from "../types/UserMutationResponse";
-import { Arg, Mutation, Query, Resolver } from "type-graphql";
 
+import { COOKIE_NAME } from "../constant";
 import { User } from "../entities/User";
+import { Context } from "../types/Context";
+import { LoginInput } from "../types/LoginInput";
 import { RegisterInput } from "../types/RegisterInput";
 import { validateRegisterInput } from "../utils/ValidateRegisterInput";
-import { LoginInput } from "../types/LoginInput";
 
 @Resolver()
 export class UserResolver {
@@ -16,7 +18,10 @@ export class UserResolver {
   //   return user;
   // }
   @Mutation((_returns) => UserMutationResponse)
-  async register(@Arg("registerInput") registerInput: RegisterInput): Promise<UserMutationResponse | null> {
+  async register(
+    @Arg("registerInput") registerInput: RegisterInput,
+    @Ctx() { req }: Context
+  ): Promise<UserMutationResponse | null> {
     const validateRegisterInputErrors = validateRegisterInput(registerInput);
     if (validateRegisterInputErrors) {
       return {
@@ -48,17 +53,21 @@ export class UserResolver {
 
       const hashPassword = await argon2.hash(password);
 
-      const newUser = User.create({
+      let newUser = User.create({
         username,
         email,
         password: hashPassword,
       });
 
+      newUser = await User.save(newUser);
+
+      req.session.userId = newUser.id;
+
       return {
         code: 200,
         success: true,
         message: "User registration successful",
-        user: await User.save(newUser),
+        user: newUser,
       };
     } catch (error) {
       console.log(error);
@@ -70,7 +79,7 @@ export class UserResolver {
     }
   }
   @Mutation((_returns) => UserMutationResponse)
-  async login(@Arg("loginInput") loginInput: LoginInput): Promise<UserMutationResponse> {
+  async login(@Arg("loginInput") loginInput: LoginInput, @Ctx() { req }: Context): Promise<UserMutationResponse> {
     try {
       const { usernameOrEmail, password } = loginInput;
       const existingUser = await User.findOneBy(
@@ -106,6 +115,9 @@ export class UserResolver {
         };
       }
 
+      req.session.userId = existingUser.id;
+
+      // console.log();
       return {
         code: 200,
         success: true,
@@ -120,5 +132,20 @@ export class UserResolver {
         message: "Internal server error",
       };
     }
+  }
+
+  @Mutation((_returns) => Boolean)
+  logout(@Ctx() { req, res }: Context): Promise<boolean> {
+    return new Promise((resolve, _reject) => {
+      res.clearCookie(COOKIE_NAME);
+      req.session.destroy((error) => {
+        if (error) {
+          console.log("Destroy session error");
+          resolve(false);
+        }
+
+        resolve(true);
+      });
+    });
   }
 }

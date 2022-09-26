@@ -1,19 +1,26 @@
+import { Field, ID, ObjectType } from "type-graphql";
 import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
+@ObjectType({ isAbstract: true })
 @Entity() //db table
 export class Post extends BaseEntity {
+  @Field((_type) => ID)
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ unique: true })
+  @Field()
+  @Column()
   title!: string;
 
-  @Column({ unique: true })
+  @Field()
+  @Column()
   text!: string;
 
+  @Field()
   @CreateDateColumn()
   createdAt: Date;
 
+  @Field()
   @UpdateDateColumn()
   updatedAt: Date;
 }
