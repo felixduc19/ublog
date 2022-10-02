@@ -1,3 +1,5 @@
-const Index = () => <h1>Hello world</h1>;
+import Sidebar from "../components/Sidebar/Sidebar";
 
-export default Index;
+export default function Index() {
+    return <Sidebar>Hello World</Sidebar>;
+}

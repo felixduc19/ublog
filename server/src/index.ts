@@ -8,6 +8,7 @@ import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
 import MongoStore from "connect-mongo";
 import session from "express-session";
+import cors from "cors";
 
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
@@ -28,6 +29,13 @@ const main = async () => {
   });
 
   const app = express();
+
+  app.use(
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true,
+    })
+  );
 
   // session/cookie store
 
