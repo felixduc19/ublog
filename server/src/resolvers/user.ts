@@ -11,12 +11,12 @@ import { validateRegisterInput } from "../utils/ValidateRegisterInput";
 
 @Resolver()
 export class UserResolver {
-  @Query((_return) => UserMutationResponse, { nullable: true })
-  // async me(@Ctx() { req }: any): Promise<User | undefined | null> {
-  //   if (!req.session.userId) return null;
-  //   const user = await User.findOne(req.session.userId);
-  //   return user;
-  // }
+  @Query((_return) => User, { nullable: true })
+  async me(@Ctx() { req }: any): Promise<User | undefined | null> {
+    if (!req.session.userId) return null;
+    const user = await User.findOneBy({ id: req.session.userId });
+    return user;
+  }
   @Mutation((_returns) => UserMutationResponse)
   async register(
     @Arg("registerInput") registerInput: RegisterInput,

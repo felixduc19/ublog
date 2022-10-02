@@ -9,6 +9,7 @@ import {
     Switch,
     Text,
     useColorModeValue,
+    useToast,
 } from "@chakra-ui/react";
 import { Form, Formik, FormikHelpers } from "formik";
 import NextLink from "next/link";
@@ -16,11 +17,22 @@ import { useRouter } from "next/router";
 
 import signInImage from "../../assets/img/signInImage.png";
 import InputField from "../../components/InputField";
-import { LoginInput, useLoginMutation } from "../../generated/graphql";
+import { Loading } from "../../components/Loading";
+import {
+    LoginInput,
+    MeDocument,
+    MeQuery,
+    useLoginMutation,
+} from "../../generated/graphql";
 import { mapErrorValidationErrorResponse } from "../../helpers/mapErrorsResponse";
+import { useCheckAuth } from "../../utils/useCheckAuth";
 
 function Login() {
     const route = useRouter();
+
+    const { data: meData, loading: meLoading } = useCheckAuth();
+
+    const toast = useToast();
 
     const titleColor = useColorModeValue("teal.300", "teal.200");
     const textColor = useColorModeValue("gray.400", "white");
@@ -42,6 +54,17 @@ function Login() {
                 variables: {
                     loginInput: values,
                 },
+
+                update(cache, { data }) {
+                    if (data?.login.success) {
+                        cache.writeQuery<MeQuery>({
+                            query: MeDocument,
+                            data: {
+                                me: data?.login.user,
+                            },
+                        });
+                    }
+                },
             });
             if (response.data?.login.errors) {
                 return setErrors(
@@ -51,9 +74,24 @@ function Login() {
 
             if (response.data?.login.success) {
                 route.push("/");
+                toast({
+                    title: `Welcome ${response.data?.login?.user?.username}`,
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                    position: "top-right",
+                    containerStyle: {
+                        marginTop: "100px",
+                    },
+                });
             }
         } catch (error) {}
     };
+
+    if (meLoading || (!meLoading && meData?.me)) {
+        return <Loading />;
+    }
+
     return (
         <Flex position="relative" mb="40px">
             <Flex

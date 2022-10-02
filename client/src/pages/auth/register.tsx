@@ -10,20 +10,32 @@ import {
     Switch,
     Text,
     useColorModeValue,
+    useToast,
 } from "@chakra-ui/react";
 // Assets
+import { Form, Formik, FormikHelpers } from "formik";
 import NextLink from "next/link";
+import { useRouter } from "next/router";
 import { FaApple, FaFacebook, FaGoogle } from "react-icons/fa";
 
-import { Form, Formik, FormikHelpers } from "formik";
 import BgSignUp from "../../assets/img/BgSignUp.png";
 import InputField from "../../components/InputField";
-import { RegisterInput, useRegisterMutation } from "../../generated/graphql";
+import { Loading } from "../../components/Loading";
+import {
+    MeDocument,
+    MeQuery,
+    RegisterInput,
+    useRegisterMutation,
+} from "../../generated/graphql";
 import { mapErrorValidationErrorResponse } from "../../helpers/mapErrorsResponse";
-import { useRouter } from "next/router";
+import { useCheckAuth } from "../../utils/useCheckAuth";
 
 function Register() {
     const route = useRouter();
+
+    const { data: meData, loading: meLoading } = useCheckAuth();
+
+    const toast = useToast();
 
     const titleColor = useColorModeValue("teal.300", "teal.200");
     const textColor = useColorModeValue("gray.700", "white");
@@ -47,6 +59,16 @@ function Register() {
                 variables: {
                     registerInput: values,
                 },
+                update(cache, { data }) {
+                    if (data?.register.success) {
+                        cache.writeQuery<MeQuery>({
+                            query: MeDocument,
+                            data: {
+                                me: data?.register.user,
+                            },
+                        });
+                    }
+                },
             });
 
             if (response.data?.register.errors) {
@@ -59,11 +81,25 @@ function Register() {
 
             if (response.data?.register.success) {
                 route.push("/");
+                toast({
+                    title: "Account created successfully",
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                    position: "top-right",
+                    containerStyle: {
+                        marginTop: "100px",
+                    },
+                });
             }
         } catch (error) {
             console.log(error);
         }
     };
+
+    if (meLoading || (!meLoading && meData?.me)) {
+        return <Loading />;
+    }
 
     return (
         <Flex
