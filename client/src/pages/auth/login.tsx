@@ -42,8 +42,7 @@ function Login() {
         password: "",
     };
 
-    const [loginUser, { loading: _loginUserLoading, data, error }] =
-        useLoginMutation();
+    const [loginUser, { loading: _loginUserLoading }] = useLoginMutation();
 
     const onLoginSubmit = async (
         values: LoginInput,
@@ -196,6 +195,16 @@ function Login() {
                             maxW="100%"
                             mt="0px"
                         >
+                            <NextLink href="/auth/forgot-password" passHref>
+                                <Link
+                                    color={titleColor}
+                                    ms="5px"
+                                    fontWeight="bold"
+                                    mb="10px"
+                                >
+                                    Forgot password?
+                                </Link>
+                            </NextLink>
                             <Text color={textColor} fontWeight="medium">
                                 Don't have an account?
                                 <NextLink href="/auth/register" passHref>

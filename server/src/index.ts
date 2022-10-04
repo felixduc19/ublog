@@ -1,21 +1,21 @@
 require("dotenv").config();
 import { ApolloServerPluginLandingPageGraphQLPlayground } from "apollo-server-core";
 import { ApolloServer } from "apollo-server-express";
+import MongoStore from "connect-mongo";
+import cors from "cors";
 import express from "express";
+import session from "express-session";
 import mongoose from "mongoose";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
-import MongoStore from "connect-mongo";
-import session from "express-session";
-import cors from "cors";
 
+import { COOKIE_NAME, __prod__ } from "./constant";
 import { Post } from "./entities/Post";
 import { User } from "./entities/User";
-import { UserResolver } from "./resolvers/user";
-import { COOKIE_NAME, __prod__ } from "./constant";
-import { Context } from "./types/Context";
 import { PostResolver } from "./resolvers/Post";
+import { UserResolver } from "./resolvers/user";
+import { Context } from "./types/Context";
 
 const main = async () => {
   await createConnection({

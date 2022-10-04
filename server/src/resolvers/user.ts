@@ -1,6 +1,7 @@
 import argon2 from "argon2";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { UserMutationResponse } from "../types/UserMutationResponse";
+import crypto from "crypto";
 
 import { COOKIE_NAME } from "../constant";
 import { User } from "../entities/User";
@@ -8,6 +9,10 @@ import { Context } from "../types/Context";
 import { LoginInput } from "../types/LoginInput";
 import { RegisterInput } from "../types/RegisterInput";
 import { validateRegisterInput } from "../utils/ValidateRegisterInput";
+import { ForgotPasswordInput } from "../types/ForgotPasswordInput";
+import { sendEmail } from "../utils/sendEmail";
+import { TokenModel } from "../models/Token";
+import { ChangePasswordInput } from "../types/ChangePasswordInput";
 
 @Resolver()
 export class UserResolver {
@@ -117,7 +122,6 @@ export class UserResolver {
 
       req.session.userId = existingUser.id;
 
-      // console.log();
       return {
         code: 200,
         success: true,
@@ -147,5 +151,101 @@ export class UserResolver {
         resolve(true);
       });
     });
+  }
+
+  @Mutation((_returns) => Boolean)
+  async forgotPassword(@Arg("forgotPasswordInput") forgotPasswordInput: ForgotPasswordInput): Promise<boolean> {
+    try {
+      const user = await User.findOneBy({ email: forgotPasswordInput.email });
+      if (!user) return true;
+      let resetToken = crypto.randomBytes(32).toString("hex");
+
+      const hashResetToken = await argon2.hash(resetToken);
+
+      await TokenModel.findOneAndDelete({ userId: `${user.id}` });
+
+      await new TokenModel({ userId: `${user.id}`, token: hashResetToken }).save();
+
+      await sendEmail(
+        forgotPasswordInput.email,
+        `<a href="http://localhost:3000/auth/change-password?token=${resetToken}&userId=${user.id}">Click here to reset your password</a>`
+      );
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
+
+  @Mutation((_returns) => UserMutationResponse)
+  async changePassword(
+    @Arg("token") token: string,
+    @Arg("userId") userId: string,
+    @Arg("changePasswordInput") changePasswordInput: ChangePasswordInput,
+    @Ctx() { req }: Context
+  ): Promise<UserMutationResponse> {
+    try {
+      if (changePasswordInput.password.length < 6) {
+        return {
+          code: 400,
+          success: false,
+          message: "Invalid password",
+          errors: [{ field: "password", message: "Length must be greater than 6" }],
+        };
+      }
+      const resetPasswordToken = await TokenModel.findOne({ userId });
+      if (!resetPasswordToken) {
+        return {
+          code: 400,
+          success: false,
+          message: "Invalid or expired reset password token",
+          errors: [{ field: "token", message: "Invalid or expired reset password token" }],
+        };
+      }
+      const resetPasswordTokenValid = await argon2.verify(resetPasswordToken.token, token);
+      if (!resetPasswordTokenValid) {
+        return {
+          code: 400,
+          success: false,
+          message: "Invalid or expired reset password token",
+          errors: [{ field: "token", message: "Invalid or expired reset password token" }],
+        };
+      }
+
+      const user = await User.findOneBy({ id: parseInt(userId) });
+      if (!user) {
+        return {
+          code: 400,
+          success: false,
+          message: "User no longer exists",
+          errors: [{ field: "user", message: "User no longer exists" }],
+        };
+      }
+
+      const updatePassword = await argon2.hash(changePasswordInput.password);
+
+      await User.update(
+        { id: parseInt(userId) },
+        {
+          password: updatePassword,
+        }
+      );
+
+      await resetPasswordToken.deleteOne();
+      req.session.userId = user?.id;
+      return {
+        code: 200,
+        success: true,
+        message: "User password reset successfully",
+        user,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        code: 500,
+        success: false,
+        message: "Internal server error",
+      };
+    }
   }
 }
