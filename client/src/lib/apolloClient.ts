@@ -9,6 +9,8 @@ import {
 import { onError } from "@apollo/client/link/error";
 import merge from "deepmerge";
 import isEqual from "lodash/isEqual";
+import { runIfFn } from "@chakra-ui/utils";
+import { Post } from "../generated/graphql";
 
 export const APOLLO_STATE_PROP_NAME = "__APOLLO_STATE__";
 
@@ -37,7 +39,40 @@ function createApolloClient() {
     return new ApolloClient({
         ssrMode: typeof window === "undefined",
         link: from([errorLink, httpLink]),
-        cache: new InMemoryCache(),
+        cache: new InMemoryCache({
+            typePolicies: {
+                Query: {
+                    fields: {
+                        posts: {
+                            keyArgs: false,
+                            merge(existingCache, imcomingCache) {
+                                console.log("existingCache", existingCache);
+                                console.log("imcomingCache", imcomingCache);
+                                let paginatedPosts: Post[] = [];
+                                if (
+                                    existingCache &&
+                                    existingCache.paginatedPosts
+                                ) {
+                                    paginatedPosts = paginatedPosts.concat(
+                                        existingCache.paginatedPosts
+                                    );
+                                }
+                                if (
+                                    imcomingCache &&
+                                    imcomingCache.paginatedPosts
+                                ) {
+                                    paginatedPosts = paginatedPosts.concat(
+                                        imcomingCache.paginatedPosts
+                                    );
+                                }
+                                return { ...imcomingCache, paginatedPosts };
+                            },
+                        },
+                    },
+                },
+            },
+        }),
+        connectToDevTools: true,
     });
 }
 

@@ -17,7 +17,6 @@ import {
     VStack,
 } from "@chakra-ui/react";
 import Link from "next/link";
-import Router from "next/router";
 import { FiBell, FiChevronDown, FiMenu } from "react-icons/fi";
 
 import {
@@ -115,7 +114,9 @@ export const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                                     spacing="1px"
                                     ml="2"
                                 >
-                                    <Text fontSize="sm">Justina Clark</Text>
+                                    <Text fontSize="sm">
+                                        {data.me.username}
+                                    </Text>
                                     <Text fontSize="xs" color="gray.600">
                                         Admin
                                     </Text>

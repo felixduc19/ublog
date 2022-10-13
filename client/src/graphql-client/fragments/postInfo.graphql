@@ -4,4 +4,9 @@ fragment postInfo on Post {
     text
     createdAt
     updatedAt
+    user {
+        id
+        username
+        email
+    }
 }

@@ -8,7 +8,7 @@ import session from "express-session";
 import mongoose from "mongoose";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
-import { createConnection } from "typeorm";
+import { DataSource } from "typeorm";
 
 import { COOKIE_NAME, __prod__ } from "./constant";
 import { Post } from "./entities/Post";
@@ -18,7 +18,16 @@ import { UserResolver } from "./resolvers/user";
 import { Context } from "./types/Context";
 
 const main = async () => {
-  await createConnection({
+  // await createConnection({
+  //   type: "postgres",
+  //   database: "ublog",
+  //   username: process.env.DB_USERNAME_DEV,
+  //   password: process.env.DB_PASSWORD_DEV,
+  //   logging: true,
+  //   synchronize: true,
+  //   entities: [User, Post],
+  // });
+  const appDataSource = new DataSource({
     type: "postgres",
     database: "ublog",
     username: process.env.DB_USERNAME_DEV,
@@ -27,6 +36,8 @@ const main = async () => {
     synchronize: true,
     entities: [User, Post],
   });
+
+  appDataSource.initialize();
 
   const app = express();
 
@@ -43,7 +54,7 @@ const main = async () => {
   await mongoose.connect(mongoUrl, {});
 
   console.log("MongoDB Connected");
-  app.set("trust proxy", 1);
+  // app.set("trust proxy", 1);
 
   app.use(
     session({
