@@ -1,11 +1,14 @@
 import {
     Box,
     BoxProps,
+    Button,
     CloseButton,
     Flex,
     Text,
     useColorModeValue,
 } from "@chakra-ui/react";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { IconType } from "react-icons";
 import {
     FiCompass,
@@ -19,13 +22,14 @@ import { NavItem } from "./NavItem";
 interface LinkItemProps {
     name: string;
     icon: IconType;
+    href: string;
 }
 const LinkItems: Array<LinkItemProps> = [
-    { name: "Home", icon: FiHome },
-    { name: "Trending", icon: FiTrendingUp },
-    { name: "Explore", icon: FiCompass },
-    { name: "Favourites", icon: FiStar },
-    { name: "Settings", icon: FiSettings },
+    { name: "Home", icon: FiHome, href: "/" },
+    { name: "Trending", icon: FiTrendingUp, href: "/" },
+    { name: "Explore", icon: FiCompass, href: "/" },
+    { name: "Favourites", icon: FiStar, href: "/" },
+    { name: "Settings", icon: FiSettings, href: "/" },
 ];
 
 interface SidebarProps extends BoxProps {
@@ -33,6 +37,7 @@ interface SidebarProps extends BoxProps {
 }
 
 export const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
+    const router = useRouter();
     return (
         <Box
             bg={useColorModeValue("white", "gray.900")}
@@ -63,10 +68,37 @@ export const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
                     onClick={onClose}
                 />
             </Flex>
+            {router.pathname !== "/create-post" && (
+                <Flex
+                    h="20"
+                    alignItems="center"
+                    mx="8"
+                    justifyContent="space-between"
+                >
+                    <Link href={"/create-post"} passHref>
+                        <Button
+                            as={"a"}
+                            display={{ base: "inline-flex" }}
+                            fontSize={"md"}
+                            fontWeight={600}
+                            color={"white"}
+                            bg={"teal.400"}
+                            _hover={{
+                                bg: "teal.300",
+                            }}
+                        >
+                            Create Post
+                        </Button>
+                    </Link>
+                </Flex>
+            )}
+
             {LinkItems.map((link) => (
-                <NavItem key={link.name} icon={link.icon}>
-                    {link.name}
-                </NavItem>
+                <Link href={link.href} passHref>
+                    <NavItem key={link.name} icon={link.icon}>
+                        {link.name}
+                    </NavItem>
+                </Link>
             ))}
         </Box>
     );

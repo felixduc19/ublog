@@ -17,6 +17,7 @@ import {
     VStack,
 } from "@chakra-ui/react";
 import Link from "next/link";
+import Router, { useRouter } from "next/router";
 import { FiBell, FiChevronDown, FiMenu } from "react-icons/fi";
 
 import {
@@ -31,6 +32,8 @@ interface MobileProps extends FlexProps {
 }
 export const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
     const { data, loading, error } = useMeQuery();
+
+    const router = useRouter();
 
     const [logoutUser, _] = useLogoutMutation();
     const onLogout = async () => {
@@ -47,6 +50,7 @@ export const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                     }
                 },
             });
+            router.push("/");
         } catch (error) {
             console.log(error);
         }
@@ -94,6 +98,7 @@ export const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                     aria-label="open menu"
                     icon={<FiBell />}
                 />
+
                 <Flex alignItems={"center"}>
                     <Menu>
                         <MenuButton

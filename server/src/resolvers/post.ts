@@ -1,15 +1,15 @@
 import { Arg, Ctx, FieldResolver, ID, Int, Mutation, Query, Resolver, Root, UseMiddleware } from "type-graphql";
 
-import { CheckAuth } from "../middleware/checkAuth";
-import { Post } from "../entities/Post";
-import { CreatePostInput } from "../types/CreatePostInput";
-import { PostMutationResponse } from "../types/PostMutationResponse";
-import { UpdatePostInput } from "../types/UpdatePostInput";
-import { User } from "../entities/User";
-import { PaginatedPosts } from "../types/PaginatedPosts";
 import { LessThan } from "typeorm";
 import { POST_LIMIT } from "../constant";
+import { Post } from "../entities/Post";
+import { User } from "../entities/User";
+import { CheckAuth } from "../middleware/checkAuth";
 import { Context } from "../types/Context";
+import { CreatePostInput } from "../types/CreatePostInput";
+import { PaginatedPosts } from "../types/PaginatedPosts";
+import { PostMutationResponse } from "../types/PostMutationResponse";
+import { UpdatePostInput } from "../types/UpdatePostInput";
 
 @Resolver((_of) => Post)
 export class PostResolver {
@@ -145,7 +145,7 @@ export class PostResolver {
 
       return {
         code: 200,
-        success: false,
+        success: true,
         message: "Updated post successfully",
         post: existingPost,
       };

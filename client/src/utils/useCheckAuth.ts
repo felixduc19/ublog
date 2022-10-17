@@ -18,6 +18,12 @@ export const useCheckAuth = () => {
                     router.route === "/auth/change-password")
             ) {
                 router.replace("/");
+            } else if (
+                !data?.me &&
+                router.route !== "/login" &&
+                router.route !== "/register"
+            ) {
+                router.replace("/auth/login");
             }
         }
     }, [data, loading, router]);

@@ -1,17 +1,21 @@
 import Sidebar from "../components/Sidebar/Sidebar";
 
-import { Loading } from "../components/Loading";
-import { PostsDocument, usePostsQuery } from "../generated/graphql";
-import { addApolloState, initializeApollo } from "../lib/apolloClient";
-import PostItem from "../components/Post/PostItem";
-import { Button } from "@chakra-ui/react";
 import { NetworkStatus } from "@apollo/client";
+import { Button } from "@chakra-ui/react";
+import { Loading } from "../components/Loading";
+import PostItem from "../components/Post/PostItem";
+import { PostsDocument, useMeQuery, usePostsQuery } from "../generated/graphql";
+import { addApolloState, initializeApollo } from "../lib/apolloClient";
 
 export default function Index() {
     const { data, loading, fetchMore, networkStatus } = usePostsQuery({
         variables: { limit: 3 },
         notifyOnNetworkStatusChange: true,
     });
+
+    const { data: dataMe } = useMeQuery();
+
+    console.log(dataMe);
 
     const loadingFetchMore = networkStatus === NetworkStatus.fetchMore;
 
@@ -37,10 +41,12 @@ export default function Index() {
                 ({ id, title, text, createdAt, user }) => (
                     <PostItem
                         key={id}
+                        id={id}
                         title={title}
                         text={text}
                         createdAt={createdAt}
                         user={user}
+                        dataMe={dataMe}
                     />
                 )
             )}
