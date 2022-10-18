@@ -1,10 +1,10 @@
-import Sidebar from "../components/Sidebar/Sidebar";
-
 import { NetworkStatus } from "@apollo/client";
 import { Button } from "@chakra-ui/react";
+
 import { Loading } from "../components/Loading";
 import PostItem from "../components/Post/PostItem";
-import { PostsDocument, useMeQuery, usePostsQuery } from "../generated/graphql";
+import Sidebar from "../components/Sidebar/Sidebar";
+import { PostsDocument, usePostsQuery } from "../generated/graphql";
 import { addApolloState, initializeApollo } from "../lib/apolloClient";
 
 export default function Index() {
@@ -12,10 +12,6 @@ export default function Index() {
         variables: { limit: 3 },
         notifyOnNetworkStatusChange: true,
     });
-
-    const { data: dataMe } = useMeQuery();
-
-    console.log(dataMe);
 
     const loadingFetchMore = networkStatus === NetworkStatus.fetchMore;
 
@@ -46,7 +42,6 @@ export default function Index() {
                         text={text}
                         createdAt={createdAt}
                         user={user}
-                        dataMe={dataMe}
                     />
                 )
             )}

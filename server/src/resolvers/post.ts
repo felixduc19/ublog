@@ -160,7 +160,7 @@ export class PostResolver {
 
   @Mutation((_return) => PostMutationResponse)
   @UseMiddleware(CheckAuth)
-  async deletePost(@Ctx() { req }: Context, @Arg("id") id: number): Promise<PostMutationResponse> {
+  async deletePost(@Ctx() { req }: Context, @Arg("id", (_type) => ID) id: number): Promise<PostMutationResponse> {
     try {
       const existingPost = await Post.findOneBy({ id });
       if (!existingPost) {

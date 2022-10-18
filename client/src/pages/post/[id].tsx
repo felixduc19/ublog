@@ -22,8 +22,6 @@ const Post = () => {
         },
     });
 
-    console.log(error);
-
     if (loading)
         return (
             <Sidebar>
@@ -47,7 +45,10 @@ const Post = () => {
             <Heading mb={4}>{data?.post.title}</Heading>
             <Box mb={4}>{data?.post.text}</Box>
 
-            <PostEditDeleteButton postId={data?.post?.id} />
+            <PostEditDeleteButton
+                postId={data?.post?.id}
+                postUserId={data?.post?.user?.id}
+            />
         </Sidebar>
     );
 };
@@ -73,7 +74,6 @@ export const getStaticProps: GetStaticProps<
     { id: string }
 > = async (context) => {
     const { params } = context;
-    // if (!params?.id) return { notFound: true };
 
     const apolloClient = initializeApollo();
 

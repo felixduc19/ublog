@@ -9,7 +9,6 @@ import {
 } from "@chakra-ui/react";
 
 import NextLink from "next/link";
-import { MeQuery } from "../../generated/graphql";
 import { PostAuthor } from "./PostAuthor";
 import PostEditDeleteButton from "./PostEditDeleteButton";
 import { PostTags } from "./PostTag";
@@ -23,34 +22,32 @@ interface PostItemProps {
         id: string;
         username: string;
     };
-    dataMe: MeQuery | undefined;
 }
 
 const PostItem = (props: PostItemProps) => {
-    const { id, title, text, createdAt, user, dataMe } = props;
-    console.log(id);
+    const { id, title, text, createdAt, user } = props;
     return (
-        <NextLink href={`/post/${id}`}>
-            <Stack marginBottom={{ base: "8", sm: "16" }}>
+        <Stack marginBottom={{ base: "8", sm: "16" }}>
+            <Box
+                marginTop={{ base: "1", sm: "5" }}
+                display="flex"
+                flexDirection={{ base: "column", sm: "row" }}
+                justifyContent="space-between"
+            >
                 <Box
-                    marginTop={{ base: "1", sm: "5" }}
                     display="flex"
-                    flexDirection={{ base: "column", sm: "row" }}
-                    justifyContent="space-between"
+                    flex="1"
+                    marginRight="3"
+                    position="relative"
+                    alignItems="center"
                 >
                     <Box
-                        display="flex"
-                        flex="1"
-                        marginRight="3"
-                        position="relative"
-                        alignItems="center"
+                        width={{ base: "100%", sm: "85%" }}
+                        zIndex="2"
+                        marginLeft={{ base: "0", sm: "5%" }}
+                        marginTop="5%"
                     >
-                        <Box
-                            width={{ base: "100%", sm: "85%" }}
-                            zIndex="2"
-                            marginLeft={{ base: "0", sm: "5%" }}
-                            marginTop="5%"
-                        >
+                        <NextLink passHref href={`/post/${id}`}>
                             <Link
                                 textDecoration="none"
                                 _hover={{ textDecoration: "none" }}
@@ -64,60 +61,62 @@ const PostItem = (props: PostItemProps) => {
                                     objectFit="contain"
                                 />
                             </Link>
-                        </Box>
-                        <Box
-                            zIndex="1"
-                            width="100%"
-                            position="absolute"
-                            height="100%"
-                        >
-                            <Box
-                                bgGradient={useColorModeValue(
-                                    "radial(orange.600 1px, transparent 1px)",
-                                    "radial(orange.300 1px, transparent 1px)"
-                                )}
-                                backgroundSize="20px 20px"
-                                opacity="0.4"
-                                height="100%"
-                            />
-                        </Box>
+                        </NextLink>
                     </Box>
                     <Box
-                        display="flex"
-                        flex="1"
-                        flexDirection="column"
-                        justifyContent="center"
-                        marginTop={{ base: "3", sm: "0" }}
+                        zIndex="1"
+                        width="100%"
+                        position="absolute"
+                        height="100%"
                     >
-                        <PostTags tags={["Engineering", "Product"]} />
-                        <Heading marginTop="1">
+                        <Box
+                            bgGradient={useColorModeValue(
+                                "radial(orange.600 1px, transparent 1px)",
+                                "radial(orange.300 1px, transparent 1px)"
+                            )}
+                            backgroundSize="20px 20px"
+                            opacity="0.4"
+                            height="100%"
+                        />
+                    </Box>
+                </Box>
+                <Box
+                    display="flex"
+                    flex="1"
+                    flexDirection="column"
+                    justifyContent="center"
+                    marginTop={{ base: "3", sm: "0" }}
+                >
+                    <PostTags tags={["Engineering", "Product"]} />
+
+                    <Heading marginTop="1">
+                        <NextLink passHref href={`/post/${id}`}>
                             <Link
                                 textDecoration="none"
                                 _hover={{ textDecoration: "none" }}
                             >
                                 {title}
                             </Link>
-                        </Heading>
-                        <Text
-                            as="p"
-                            marginTop="2"
-                            color={useColorModeValue("gray.700", "gray.200")}
-                            fontSize="lg"
-                            noOfLines={5}
-                        >
-                            {text}
-                        </Text>
-                        <PostAuthor
-                            name={user?.username}
-                            date={new Date(createdAt)}
-                        />
-                        {dataMe?.me && dataMe?.me?.id === user.id && (
-                            <PostEditDeleteButton postId={id} />
-                        )}
-                    </Box>
+                        </NextLink>
+                    </Heading>
+                    <Text
+                        as="p"
+                        marginTop="2"
+                        color={useColorModeValue("gray.700", "gray.200")}
+                        fontSize="lg"
+                        noOfLines={5}
+                    >
+                        {text}
+                    </Text>
+
+                    <PostAuthor
+                        name={user?.username}
+                        date={new Date(createdAt)}
+                    />
+                    <PostEditDeleteButton postId={id} postUserId={user?.id} />
                 </Box>
-            </Stack>
-        </NextLink>
+            </Box>
+        </Stack>
     );
 };
 

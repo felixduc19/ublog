@@ -1,7 +1,5 @@
 fragment postMutationResponse on PostMutationResponse {
-    code
-    success
-    message
+    ...postMutationStatuses
     post {
         ...postWithUserInfo
     }

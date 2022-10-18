@@ -17,7 +17,7 @@ import {
     VStack,
 } from "@chakra-ui/react";
 import Link from "next/link";
-import Router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import { FiBell, FiChevronDown, FiMenu } from "react-icons/fi";
 
 import {
@@ -56,7 +56,6 @@ export const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         }
     };
 
-    // console.log(data);
     if (loading) return null;
 
     const renderUserLoggedIn = () => {

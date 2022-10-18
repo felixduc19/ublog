@@ -1,15 +1,14 @@
-import { useMemo } from "react";
 import {
     ApolloClient,
+    from,
     HttpLink,
     InMemoryCache,
-    from,
     NormalizedCacheObject,
 } from "@apollo/client";
 import { onError } from "@apollo/client/link/error";
 import merge from "deepmerge";
 import isEqual from "lodash/isEqual";
-import { runIfFn } from "@chakra-ui/utils";
+import { useMemo } from "react";
 import { Post } from "../generated/graphql";
 
 export const APOLLO_STATE_PROP_NAME = "__APOLLO_STATE__";
@@ -46,8 +45,6 @@ function createApolloClient() {
                         posts: {
                             keyArgs: false,
                             merge(existingCache, imcomingCache) {
-                                console.log("existingCache", existingCache);
-                                console.log("imcomingCache", imcomingCache);
                                 let paginatedPosts: Post[] = [];
                                 if (
                                     existingCache &&
